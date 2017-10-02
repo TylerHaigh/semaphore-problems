@@ -1,10 +1,10 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.farmers.part2;
 
 import com.haight.comp2240.farmers.common.Island;
 
 public class Program {
 
-    public static final int FarmersToGenerate = 1;
+    public static final int FarmersToGenerate = 10;
     public static final boolean GenerateNorthFarmers = true;
     public static final boolean GenerateSouthFarmers = true;
 

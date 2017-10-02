@@ -1,9 +1,10 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.farmers.common;
 
 public enum Island {
 
     North("N", "North"),
-    South("S", "South");
+    South("S", "South"),
+    Undefined("U", "Undefined");
 
     private String code;
     public String code() { return code; }

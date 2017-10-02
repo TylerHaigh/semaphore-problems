@@ -1,4 +1,4 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.farmers.common;
 
 public class NeonSign {
     private int crossingCount = 0;

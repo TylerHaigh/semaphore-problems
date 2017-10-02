@@ -1,4 +1,4 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.farmers.part2;
 
 import com.haight.comp2240.farmers.common.Island;
 
@@ -25,15 +25,12 @@ public class Farmer implements Runnable {
 
 
     public void run() {
-        while(true)
-        {
-            try {
-                bridge.enterBridge(this);
-                bridge.crossBridge(this);
-                bridge.exitBridge(this);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            bridge.enterBridge(this);
+            bridge.crossBridge(this);
+            bridge.exitBridge(this);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

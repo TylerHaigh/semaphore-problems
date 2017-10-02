@@ -1,5 +1,7 @@
 package com.haight.comp2240.farmers.part1;
 
+import com.haight.comp2240.farmers.common.NeonSign;
+
 import java.util.concurrent.Semaphore;
 
 public class Bridge {
