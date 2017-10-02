@@ -1,3 +1,5 @@
+package com.haight.comp2240.farmers.part1;
+
 import java.util.concurrent.Semaphore;
 
 public class Bridge {
