@@ -30,6 +30,8 @@ public class SignChanger implements Runnable {
                 if (randVal > 0.5) sign.increment();
                 else sign.decrement();
 
+                System.out.println("The value is now: " + sign.value());
+
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

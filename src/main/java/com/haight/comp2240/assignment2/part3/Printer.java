@@ -2,8 +2,6 @@ package com.haight.comp2240.assignment2.part3;
 
 import com.haight.semaphores.common.Lightswitch;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.concurrent.Semaphore;
 
 public class Printer {
@@ -18,20 +16,19 @@ public class Printer {
 
     private static final int NumberOfConcurrentJobs = 3;
 
+    // Semaphores designed to implement the unisex bathroom problem
     Lightswitch monochromeLightswitch = new Lightswitch();
     Lightswitch colourLightswitch = new Lightswitch();
-    Semaphore monochromeJobBatch = new Semaphore(1);
-    Semaphore colourJobBatch = new Semaphore(1);
+    Semaphore printerBatchEmpty = new Semaphore(1);
 
-    MasterJobBatch masterList = new MasterJobBatch(new ArrayList<>());
-    PrinterHeadSet heads = new PrinterHeadSet();
+    // Semaphores to enforce limited number of jobs
+    Semaphore monochromeJobLimit = new Semaphore(NumberOfConcurrentJobs);
+    Semaphore colourJobLimit = new Semaphore(NumberOfConcurrentJobs);
 
-    public Printer(MasterJobBatch masterList) {
-        this.masterList = masterList;
-    }
+    // Semaphore to ensure no starvation
+    Semaphore turnstile = new Semaphore(1);
 
-
-    public synchronized void submitJob(PrinterJob job) throws InterruptedException {
+    public void submitJob(PrinterJob job) throws InterruptedException {
 
         // Submits the job to a Semaphore based queueing system
         // And lets the job through the semaphore when it is permitted to runFemale on the PrinterHead
@@ -39,14 +36,17 @@ public class Printer {
         // Treat Monochrome jobs as a Writer
         // and treat Color jobs as a reader
 
+        System.out.println(job.toString() + ": Arrived at printer. Waiting to run...");
 
         if (job.isMonochromeJob())
             manageMonochromeJob(job);
         else
             manageColourJob(job);
+
+        System.out.println(job.toString() + ": Finished");
     }
 
-    private synchronized void manageMonochromeJob(PrinterJob job) {
+    private void manageMonochromeJob(PrinterJob job) throws InterruptedException {
         // readers / writers problem
         // Writers must wait on reader's resource to be open
         // Readers must lock the writer's resource when the first one enters the room, and release it when the last one exits
@@ -54,88 +54,33 @@ public class Printer {
         // Unisex bathroom problem
         // Limited resource but a limited number of access permits
 
-    }
-
-    private synchronized void manageColourJob(PrinterJob job) {
-
-    }
-
-
-
-
-    public synchronized boolean thisJobIsJobAllowedToRun(PrinterJob job) {
-
-        // Check for any jobs with ID less than the current job
-        PrinterJob lowerOrderJob = getJobWithIdLessThanThan(job);
-        if (lowerOrderJob == null) {
-            // This is the lowest ordered job
-            return true;
+        turnstile.acquire();
+        monochromeLightswitch.lock(printerBatchEmpty);
+        turnstile.release();
+        {
+            monochromeJobLimit.acquire();
+            {
+                job.printPages();
+            }
+            monochromeJobLimit.release();
         }
+        monochromeLightswitch.unlock(printerBatchEmpty);
 
-        // This is not the lowest ordered job. Is the lower ordered job in the activeJobs list
-        // or the finishedJobs list?
-        // If so, this job can be allowed to runFemale
-        // otherwise, it can't be allowed to runFemale
 
-        return true;
-        //return activeJobs.contains(lowerOrderJob) || completedJobs.contains(lowerOrderJob);
     }
 
-    private synchronized PrinterJob getJobWithIdLessThanThan(PrinterJob job) {
-        return masterList.submittedJobs
-                .stream()
-                .filter(j -> j.type == job.type)
-                .filter(j -> j.jobId < job.jobId)
-                .sorted(Comparator.comparingInt(j -> j.jobId))
-                .findFirst()
-                .orElse(null);
+    private void manageColourJob(PrinterJob job) throws InterruptedException {
+        turnstile.acquire();
+        colourLightswitch.lock(printerBatchEmpty);
+        turnstile.release();
+        {
+            colourJobLimit.acquire();
+            {
+                job.printPages();
+            }
+            colourJobLimit.release();
+        }
+        colourLightswitch.unlock(printerBatchEmpty);
     }
 
-
-    private synchronized void runActiveJob(PrinterJob job) throws InterruptedException {
-        // The printer can only operate in one mode at a time
-        // If a monochrome job is running, then the print heads can only operate in monochrome
-        // Thus, a colour job must wait for all monochrome jobs to finish before it is permitted
-        // This implies the use of a Lightswitch where the first Thread locks the resource, and the last resource
-        // releases the resource
-
-//        lightswitch.lock(activeJobBatch);
-//        {
-//            // Only jobs of the same type can runFemale here
-//            Thread t = new Thread(job);
-//            t.start();
-//        }
-//        lightswitch.unlock(activeJobBatch);
-
-        //lightswitch.lock(activeJobBatch);
-
-        heads.addJobToVacantPosition(job);
-        //jobQueue.remove(job);
-        //activeJobs.add(job);
-    }
-
-    /*
-
-    private synchronized PrinterJob nextJob() {
-        return nextJob(currentPrintingMode);
-    }
-
-    private synchronized PrinterJob nextJob(JobType type) {
-        return jobQueue.stream()
-                .filter(j -> j.type == type)
-                .sorted(Comparator.comparingInt(j2 -> j2.jobId))
-                .findFirst()
-                .orElse(null);
-    }
-
-*/
-
-    public synchronized void removeJob(PrinterJob job) throws InterruptedException {
-        heads.removeJobFromHead(job);
-        //activeJobs.remove(job);
-        //completedJobs.add(job);
-
-        // TODO: Signal that the job has finished
-        //lightswitch.unlock(activeJobBatch);
-    }
 }
