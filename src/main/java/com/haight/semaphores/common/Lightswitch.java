@@ -1,4 +1,4 @@
-package com.haight.comp2240.farmers.common;
+package com.haight.semaphores.common;
 
 import java.util.concurrent.Semaphore;
 

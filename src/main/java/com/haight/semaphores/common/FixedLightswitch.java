@@ -1,8 +1,12 @@
-package com.haight.comp2240.farmers.common;
+package com.haight.semaphores.common;
 
 import java.util.concurrent.Semaphore;
 
-public class Lightswitch2 {
+public class FixedLightswitch {
+
+    // Only allows locking and unlocking of a single resource
+    // Much safer as it is self contained and keeps correct count on the resource
+    // but provides less readability when using the api
 
     private int peopleInTheRoom = 0;
     private Semaphore countMutex = new Semaphore(1);
@@ -12,7 +16,7 @@ public class Lightswitch2 {
     // thus, the writers must wait until the room is empty
 
     private Semaphore resource;
-    public Lightswitch2(Semaphore resource) { this.resource = resource; }
+    public FixedLightswitch(Semaphore resource) { this.resource = resource; }
 
     public void lock() throws InterruptedException {
         countMutex.acquire();
@@ -26,7 +30,7 @@ public class Lightswitch2 {
         peopleInTheRoom++;
 
         if (firstPersonToEnterTheRoom())
-            resource.acquire();
+            resource.acquire(); // Lock the resource so that no writers can enter the room
     }
 
     private boolean firstPersonToEnterTheRoom() { return peopleInTheRoom == 1; }
@@ -44,7 +48,7 @@ public class Lightswitch2 {
         peopleInTheRoom--;
 
         if (lastPersonToLeaveTheRoom())
-            resource.release();
+            resource.release(); // Release the resource so that writers can enter the room
     }
 
 }

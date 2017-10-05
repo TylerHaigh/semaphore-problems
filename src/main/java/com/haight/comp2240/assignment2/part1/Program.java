@@ -1,6 +1,6 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.assignment2.part1;
 
-import com.haight.comp2240.farmers.common.Island;
+import com.haight.comp2240.assignment2.common.Island;
 
 public class Program {
 

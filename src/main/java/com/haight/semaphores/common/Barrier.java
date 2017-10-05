@@ -1,18 +1,22 @@
-package com.haight.comp2240.farmers.common;
+package com.haight.semaphores.common;
 
 import java.util.concurrent.Semaphore;
 
-public class Barrier2 {
+public class Barrier {
+
+    // Maintains a single counter for how many threads have rendezvoused at the barrier's
+    // entry and exit locations
+    // Works fine for when exactly n threads exist and need to rendezvous, but will not work
+    // when there are more than n threads and only n need to be allowed through at a time
 
     private Semaphore countMutex = new Semaphore(1);
     private Semaphore entryTurnstile = new Semaphore(0); // Initially Locked
     private Semaphore exitTurnstile  = new Semaphore(0); // Initially Locked
 
-    private int enterCounter = 0;
-    private int exitCounter = 0;
+    private int currentCount = 0;
     private int barrierRequiredCount = 0;
 
-    public Barrier2(int barrierRequiredCount) { this.barrierRequiredCount = barrierRequiredCount; }
+    public Barrier(int barrierRequiredCount) { this.barrierRequiredCount = barrierRequiredCount; }
 
     public void enter() throws InterruptedException {
         safeIncrement();
@@ -33,12 +37,10 @@ public class Barrier2 {
     }
 
     private void incrementCount() {
-        enterCounter++;
+        currentCount++;
 
-        if (allThreadsHaveEnteredUnsafe()) {
+        if (allThreadsHaveEnteredUnsafe())
             entryTurnstile.release(barrierRequiredCount); // Unlock the First Turnstile and allow all threads to pass through
-            enterCounter = 0;
-        }
     }
 
     public boolean allThreadsHaveEntered() throws InterruptedException {
@@ -51,9 +53,7 @@ public class Barrier2 {
         return result;
     }
 
-    private boolean allThreadsHaveEnteredUnsafe() {
-        return enterCounter == barrierRequiredCount;
-    }
+    private boolean allThreadsHaveEnteredUnsafe() { return currentCount == barrierRequiredCount; }
 
 
 
@@ -76,13 +76,10 @@ public class Barrier2 {
     }
 
     private void decrementCount() {
-        // This is safe since is is called from safeDecrement
-        exitCounter++;
+        currentCount--;
 
-        if (allThreadsHaveExitedUnsafe()) { // called in safe manner
+        if (allThreadsHaveExitedUnsafe())
             exitTurnstile.release(barrierRequiredCount);
-            exitCounter = 0;
-        }
     }
 
     public boolean allThreadsHaveExited() throws InterruptedException {
@@ -95,7 +92,7 @@ public class Barrier2 {
         return result;
     }
 
-    private boolean allThreadsHaveExitedUnsafe() { return exitCounter == barrierRequiredCount; }
+    private boolean allThreadsHaveExitedUnsafe() { return currentCount == 0; }
 
 
 }

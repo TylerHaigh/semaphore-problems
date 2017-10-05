@@ -1,17 +1,18 @@
-package com.haight.comp2240.farmers.common;
+package com.haight.semaphores.common;
 
 import java.util.concurrent.Semaphore;
 
-public class Barrier {
+public class RendezvousBarrier {
 
     private Semaphore countMutex = new Semaphore(1);
     private Semaphore entryTurnstile = new Semaphore(0); // Initially Locked
     private Semaphore exitTurnstile  = new Semaphore(0); // Initially Locked
 
-    private int currentCount = 0;
+    private int enterCounter = 0;
+    private int exitCounter = 0;
     private int barrierRequiredCount = 0;
 
-    public Barrier(int barrierRequiredCount) { this.barrierRequiredCount = barrierRequiredCount; }
+    public RendezvousBarrier(int barrierRequiredCount) { this.barrierRequiredCount = barrierRequiredCount; }
 
     public void enter() throws InterruptedException {
         safeIncrement();
@@ -32,10 +33,12 @@ public class Barrier {
     }
 
     private void incrementCount() {
-        currentCount++;
+        enterCounter++;
 
-        if (allThreadsHaveEnteredUnsafe())
+        if (allThreadsHaveEnteredUnsafe()) {
             entryTurnstile.release(barrierRequiredCount); // Unlock the First Turnstile and allow all threads to pass through
+            enterCounter = 0;
+        }
     }
 
     public boolean allThreadsHaveEntered() throws InterruptedException {
@@ -48,7 +51,9 @@ public class Barrier {
         return result;
     }
 
-    private boolean allThreadsHaveEnteredUnsafe() { return currentCount == barrierRequiredCount; }
+    private boolean allThreadsHaveEnteredUnsafe() {
+        return enterCounter == barrierRequiredCount;
+    }
 
 
 
@@ -71,10 +76,13 @@ public class Barrier {
     }
 
     private void decrementCount() {
-        currentCount--;
+        // This is safe since is is called from safeDecrement
+        exitCounter++;
 
-        if (allThreadsHaveExitedUnsafe())
+        if (allThreadsHaveExitedUnsafe()) { // called in safe manner
             exitTurnstile.release(barrierRequiredCount);
+            exitCounter = 0;
+        }
     }
 
     public boolean allThreadsHaveExited() throws InterruptedException {
@@ -87,7 +95,7 @@ public class Barrier {
         return result;
     }
 
-    private boolean allThreadsHaveExitedUnsafe() { return currentCount == 0; }
+    private boolean allThreadsHaveExitedUnsafe() { return exitCounter == barrierRequiredCount; }
 
 
 }

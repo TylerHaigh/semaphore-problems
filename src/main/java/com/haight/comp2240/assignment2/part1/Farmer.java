@@ -1,15 +1,15 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.assignment2.part1;
 
-import com.haight.comp2240.farmers.common.Island;
+import com.haight.comp2240.assignment2.common.Island;
 
 public class Farmer implements Runnable {
 
 
-    public int id;
-    public Island currentIsland;
-    public Island initialIsland;
+    private int id;
+    private Island currentIsland;
+    private Island initialIsland;
 
-    public Bridge bridge;
+    private Bridge bridge;
 
     public Farmer(int id, Island initialIsland, Bridge bridge) {
         this.id = id;

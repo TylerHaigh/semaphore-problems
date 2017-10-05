@@ -1,10 +1,12 @@
-package com.haight.comp2240.farmers.part1;
+package com.haight.comp2240.assignment2.part1;
 
-import com.haight.comp2240.farmers.common.NeonSign;
+import com.haight.comp2240.assignment2.common.NeonSign;
 
 import java.util.concurrent.Semaphore;
 
 public class Bridge {
+
+    // Allows mutual exclusive access to a limited resource
 
     private NeonSign sign = new NeonSign();
     private Semaphore lock = new Semaphore(1);
