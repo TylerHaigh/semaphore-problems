@@ -1,4 +1,4 @@
-package com.haight.semaphores.common;
+package com.haight.semaphores.counter;
 
 public class Counter {
 
